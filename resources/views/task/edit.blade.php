@@ -41,8 +41,10 @@
                 </div>
                 @auth
                 <div class="mt-6">
-                    <button class="px-4 py-1 text-white font-light tracking-wider bg-gray-900 rounded"
-                        type="Update">Update</button>
+                    <button class="px-4 py-2 bg-blue-600 text-white font-bold rounded hover:bg-blue-700"
+                  type="submit">Update</button>
+
+
                 </div>
                 @else
                 <p class="font-bold "><a href="/login" class="underline">Sign in</a> to update this

@@ -52,7 +52,9 @@ class TaskController extends Controller
         $attributes['slug'] = Str::slug($request->title);
         $task = Task::create($attributes);
 
-        $this->notifyUser($task->assigneduser_id);
+        // Send notification with custom message
+        $customMessage = "Tu as une nouvelle tâche : " . $task->title;
+        $this->notifyUser($task->assigneduser_id, $customMessage);
 
         return redirect('/')->with('success', 'Task updated and assigned user notified by email');
     }
@@ -100,7 +102,9 @@ class TaskController extends Controller
         $attributes['slug'] = Str::slug($request->title);
         $task->update($attributes);
 
-        $this->notifyUser($task->assigneduser_id);
+        // Send notification with custom message
+        $customMessage = "Tu as une nouvelle tâche : " . $task->title;
+        $this->notifyUser($task->assigneduser_id, $customMessage);
 
         return redirect('/task')->with('success', 'Task updated and assigned user notified by email');
     }
@@ -142,11 +146,13 @@ class TaskController extends Controller
         return redirect('/task')->with('success', 'Task marked completed');
     }
 
-    public function notifyUser($assignedUserId)
+    public function notifyUser($assignedUserId, $customMessage = null)
     {
         $task = Task::where('assigneduser_id',$assignedUserId)->first();
         $user = User::where('id', $assignedUserId)->first();
-        Notification::send($user, new TaskAssigned($task));
+
+        // If a custom message is provided, use it, otherwise use the default
+        Notification::send($user, new TaskAssigned($task, $customMessage));
 
         return back()->with('success', 'Task notification email has been sent to the assigned user');
     }

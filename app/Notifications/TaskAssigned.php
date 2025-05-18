@@ -16,9 +16,10 @@ class TaskAssigned extends Notification
      *
      * @return void
      */
-    public function __construct($task)
+    public function __construct($task, $message = null)
     {
         $this->task = $task;
+        $this->message = $message ?? 'New Task has been assigned to you.';
     }
 
     /**
@@ -42,8 +43,8 @@ class TaskAssigned extends Notification
     {
         return (new MailMessage)
                     ->subject('Hello from Task Manager')
-                    ->line('New Task has been assigned to you.')
-                    ->action('View Task', route('task.show', ['task' => $this->task]))
+                    ->line($this->message)
+                    ->action('View Task', route('task.show', ['task' => $this->task->id]))
                     ->line('Thank you for using our application!');
     }
 

@@ -43,8 +43,10 @@ class TaskCompleted extends Notification
     {
         return (new MailMessage)
                     ->subject('Hello from Task Manager')
-                    ->line('A task you created or was assigned to you has been marked completed.')
-                    ->action('View Task', route('task.show', ['task' => $this->task]))
+                     ->line($this->message)
+
+
+                     ->action('View Task', route('task.show', ['task' => $this->task->id]))
                     ->line('Thank you for using our application!');
     }
 
@@ -59,6 +61,7 @@ class TaskCompleted extends Notification
         return [
             'title'=>$this->task->title,
             'message'=>'Task you created or were assigned to has been marked completed'
+
         ];
     }
 }
