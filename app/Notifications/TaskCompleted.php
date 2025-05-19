@@ -11,15 +11,19 @@ class TaskCompleted extends Notification
 {
     use Queueable;
     public $task;
+    public $message;
 
     /**
      * Create a new notification instance.
      *
+     * @param mixed $task
+     * @param string|null $message
      * @return void
      */
-    public function __construct($task)
+    public function __construct($task, $message = null)
     {
         $this->task = $task;
+        $this->message = $message;
     }
 
     /**
@@ -43,10 +47,8 @@ class TaskCompleted extends Notification
     {
         return (new MailMessage)
                     ->subject('Hello from Task Manager')
-                     ->line($this->message)
-
-
-                     ->action('View Task', route('task.show', ['task' => $this->task->id]))
+                    ->line($this->message)
+                    ->action('View Task', route('task.show', ['task' => $this->task->id]))
                     ->line('Thank you for using our application!');
     }
 

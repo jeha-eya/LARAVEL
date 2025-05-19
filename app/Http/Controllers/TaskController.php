@@ -54,7 +54,7 @@ class TaskController extends Controller
 
         // Send notification with custom message
         $customMessage = "Tu as une nouvelle tâche : " . $task->title;
-        $this->notifyUser($task->assigneduser_id, $customMessage);
+        $this->notifyUser($task->assigneduser_id, $customMessage, $task->id);
 
         return redirect('/')->with('success', 'Task updated and assigned user notified by email');
     }
@@ -104,7 +104,7 @@ class TaskController extends Controller
 
         // Send notification with custom message
         $customMessage = "Tu as une nouvelle tâche : " . $task->title;
-        $this->notifyUser($task->assigneduser_id, $customMessage);
+        $this->notifyUser($task->assigneduser_id, $customMessage, $task->id);
 
         return redirect('/task')->with('success', 'Task updated and assigned user notified by email');
     }
@@ -118,7 +118,7 @@ class TaskController extends Controller
     public function destroy($id)
     {
         $task = Task::find($id);
-        $task->delete;
+        $task->delete();
         return redirect('/task')->with('success', 'Task Deleted');
     }
 
@@ -142,14 +142,29 @@ class TaskController extends Controller
         $users = User::where('id', $task->assigneduser_id )
                         ->orWhere('id',$task->taskcreator_id)
                         ->get();
-        Notification::send($users, new TaskCompleted($task));
+
+        // Custom message for task completion notification
+        $customMessage = "La tâche '{$task->title}' a été marquée comme terminée.";
+        Notification::send($users, new TaskCompleted($task, "La tâche '{$task->title}' a été complétée !"));
+
         return redirect('/task')->with('success', 'Task marked completed');
     }
 
-    public function notifyUser($assignedUserId, $customMessage = null)
+    public function notifyUser($assignedUserId, $customMessage = null, $taskId = null)
     {
-        $task = Task::where('assigneduser_id',$assignedUserId)->first();
-        $user = User::where('id', $assignedUserId)->first();
+        if ($taskId) {
+            // If a task ID is provided, use that specific task
+            $task = Task::find($taskId);
+        } else {
+            // Otherwise, find the most recent task assigned to this user
+            $task = Task::where('assigneduser_id', $assignedUserId)->latest()->first();
+        }
+
+        $user = User::find($assignedUserId);
+
+        if (!$task || !$user) {
+            return back()->with('error', 'Task or user not found');
+        }
 
         // If a custom message is provided, use it, otherwise use the default
         Notification::send($user, new TaskAssigned($task, $customMessage));
